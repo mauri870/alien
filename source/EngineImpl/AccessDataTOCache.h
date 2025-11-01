@@ -4,7 +4,7 @@
 
 #include "EngineInterface/ArraySizes.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineGpuKernels/TOs.cuh"
+#include "EngineGpuKernels/TOs.hip.h"
 
 #include "Definitions.h"
 

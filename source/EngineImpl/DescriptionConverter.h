@@ -7,7 +7,7 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineGpuKernels/TOs.cuh"
+#include "EngineGpuKernels/TOs.hip.h"
 #include "Definitions.h"
 
 class DescriptionConverter

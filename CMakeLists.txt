@@ -30,18 +30,6 @@ else()
 endif()
 add_compile_definitions($<$<COMPILE_LANGUAGE:CXX>:NOMINMAX>)
 
-# Recursively find all CUDA source and header files
-file(GLOB_RECURSE CUDA_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cu"
-    "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cuh"
-)
-
-# Mark them as HIP and print each file path
-foreach(src ${CUDA_SOURCES})
-    message(STATUS "Setting LANGUAGE=HIP for: ${src}")
-    set_source_files_properties(${src} PROPERTIES LANGUAGE HIP)
-endforeach()
-
 # TODO(mauri870): support either nvidia or amd
 add_compile_definitions(__HIP_PLATFORM_AMD__)
 

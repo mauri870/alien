@@ -2,8 +2,8 @@
 
 #include <chrono>
 
-#include "EngineGpuKernels/TOs.cuh"
-#include "EngineGpuKernels/SimulationCudaFacade.cuh"
+#include "EngineGpuKernels/TOs.hip.h"
+#include "EngineGpuKernels/SimulationCudaFacade.hip.h"
 #include "AccessDataTOCache.h"
 #include "DescriptionConverter.h"
 
