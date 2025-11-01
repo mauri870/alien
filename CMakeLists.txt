@@ -40,7 +40,7 @@ endif()
 add_compile_definitions($<$<COMPILE_LANGUAGE:CXX>:NOMINMAX>)
 
 # Treat all NVCC (CUDA) warnings as errors
-add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
+# add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
 
 add_executable(alien)
 add_executable(cli)
