@@ -1,7 +1,8 @@
+#include "hip/hip_runtime.h"
 #pragma once
 
-#include <cuda_runtime.h>
-#include <vector_types.h>
+#include <hip/hip_runtime.h>
+#include <hip/hip_vector_types.h>
 
 #include "Math.cuh"
 #include "Object.cuh"

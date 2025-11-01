@@ -13,7 +13,6 @@ add_library(EngineImpl
 target_link_libraries(EngineImpl Base)
 target_link_libraries(EngineImpl EngineGpuKernels)
 
-target_link_libraries(EngineImpl CUDA::cudart_static)
 target_link_libraries(EngineImpl Boost::boost)
 
 if (MSVC)

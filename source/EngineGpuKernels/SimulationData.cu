@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 ﻿#include "SimulationData.cuh"
 
 #include "ConstantMemory.cuh"
@@ -15,7 +16,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     particleMap.init(worldSize);
 
     CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
-    CHECK_FOR_CUDA_ERROR(cudaMemset(externalEnergy, 0, sizeof(double)));
+    CHECK_FOR_CUDA_ERROR(hipMemset(externalEnergy, 0, sizeof(double)));
  
     processMemory.init();
     numberGen1.init(40312357);   //some array size for random numbers (~ 40 MB)

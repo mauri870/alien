@@ -21,7 +21,7 @@ void _GarbageCollectorKernelsLauncher::cleanupAfterTimestep(GpuSettings const& g
     KERNEL_CALL_1_1(cudaSwapPointerArrays, data);
 
     KERNEL_CALL_1_1(cudaCheckIfCleanupIsNecessary, data, _cudaBool);
-    cudaDeviceSynchronize();
+    hipDeviceSynchronize();
     if (copyToHost(_cudaBool)) {
         KERNEL_CALL_1_1(cudaPrepareArraysForCleanup, data);
         KERNEL_CALL(cudaCleanupParticles, data.objects.particlePointers, data.tempObjects.particles);

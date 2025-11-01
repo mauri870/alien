@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #pragma once
 
 #include "EngineInterface/RawStatisticsData.h"
@@ -13,7 +14,7 @@ public:
     {
         CudaMemoryManager::getInstance().acquireMemory<RawStatisticsData>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<ColorCount>(MutantToColorCountMapSize, _mutantToColorCountMap);
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_data, 0, sizeof(RawStatisticsData)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_data, 0, sizeof(RawStatisticsData)));
     }
 
     __host__ void free()
@@ -25,7 +26,7 @@ public:
     __host__ RawStatisticsData getStatistics()
     {
         RawStatisticsData result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(RawStatisticsData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(&result, _data, sizeof(RawStatisticsData), hipMemcpyDeviceToHost));
         return result;
     }
 
@@ -77,9 +78,9 @@ public:
     __host__ void resetAccumulatedStatistics()
     {
         RawStatisticsData hostData;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&hostData, _data, sizeof(RawStatisticsData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(&hostData, _data, sizeof(RawStatisticsData), hipMemcpyDeviceToHost));
         hostData.timeline.accumulated = AccumulatedStatistics();
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &hostData, sizeof(RawStatisticsData), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(_data, &hostData, sizeof(RawStatisticsData), hipMemcpyHostToDevice));
     }
 
     __inline__ __device__ void incNumCreatedCells(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numCreatedCells[color], uint64_t(1)); }

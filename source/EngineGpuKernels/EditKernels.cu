@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 ﻿#include "EditKernels.cuh"
 
 #include "MutationProcessor.cuh"

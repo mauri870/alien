@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 ﻿#include "GarbageCollectorKernels.cuh"
 
 __global__ void cudaPreparePointerArraysForCleanup(SimulationData data)

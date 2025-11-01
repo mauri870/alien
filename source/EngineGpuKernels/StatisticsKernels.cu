@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 ﻿#include "StatisticsKernels.cuh"
 
 #include "GenomeDecoder.cuh"

@@ -26,8 +26,6 @@ target_link_libraries(EngineTests EngineGpuKernels)
 target_link_libraries(EngineTests EngineImpl)
 target_link_libraries(EngineTests EngineInterface)
 
-target_link_libraries(EngineTests CUDA::cudart_static)
-target_link_libraries(EngineTests CUDA::cuda_driver)
 target_link_libraries(EngineTests Boost::boost)
 target_link_libraries(EngineTests OpenGL::GL OpenGL::GLU)
 target_link_libraries(EngineTests GLEW::GLEW)

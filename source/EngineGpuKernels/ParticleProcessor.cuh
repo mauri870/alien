@@ -1,6 +1,7 @@
+#include "hip/hip_runtime.h"
 #pragma once
 
-#include "cuda_runtime_api.h"
+#include "hip/hip_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
 #include "Base.cuh"

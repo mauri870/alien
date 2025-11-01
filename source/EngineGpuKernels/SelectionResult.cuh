@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 ﻿#pragma once
 
 #include "EngineInterface/SelectionShallowData.h"
@@ -10,7 +11,7 @@ public:
     __host__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<SelectionShallowData>(1, _selectionShallowData);
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_selectionShallowData, 0, sizeof(SelectionShallowData)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_selectionShallowData, 0, sizeof(SelectionShallowData)));
     }
 
     __host__ void free()
@@ -22,7 +23,7 @@ public:
     {
         SelectionShallowData result;
         CHECK_FOR_CUDA_ERROR(
-            cudaMemcpy(&result, _selectionShallowData, sizeof(SelectionShallowData), cudaMemcpyDeviceToHost));
+            hipMemcpy(&result, _selectionShallowData, sizeof(SelectionShallowData), hipMemcpyDeviceToHost));
 
         return result;
     }

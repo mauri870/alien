@@ -1,5 +1,5 @@
 
-add_library(EngineGpuKernels
+hip_add_library(EngineGpuKernels
     ActiveRadiationSources.cuh
     Array.cuh
     AttackerProcessor.cuh
@@ -95,5 +95,8 @@ add_library(EngineGpuKernels
 target_link_libraries(EngineGpuKernels Base)
 target_link_libraries(EngineGpuKernels EngineInterface)
 
-# See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
-set_property(TARGET EngineGpuKernels PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+# Link with HIP libraries - use the correct target name for ROCm/HIP
+target_link_libraries(EngineGpuKernels ${HIP_LIBRARIES})
+
+set_property(TARGET EngineGpuKernels PROPERTY HIP_SEPARABLE_COMPILATION ON)
+set_property(TARGET EngineGpuKernels PROPERTY HIP_RESOLVE_DEVICE_SYMBOLS ON)

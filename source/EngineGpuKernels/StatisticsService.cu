@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #include "StatisticsService.cuh"
 
 #include "EngineInterface/StatisticsConverterService.h"

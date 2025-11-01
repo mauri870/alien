@@ -1,6 +1,7 @@
+#include "hip/hip_runtime.h"
 ﻿#pragma once
 
-#include "cuda_runtime_api.h"
+#include "hip/hip_runtime_api.h"
 
 #include "EngineInterface/SimulationParametersSpotValues.h"
 #include "ConstantMemory.cuh"

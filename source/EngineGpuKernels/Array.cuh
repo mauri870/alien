@@ -1,8 +1,9 @@
+#include "hip/hip_runtime.h"
 #pragma once
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-#include <cuda/helper_cuda.h>
+#include <hip/hip_runtime.h>
+#include <>
+#include <cuda/hip/hip_runtime_api.h>
 
 #include "CudaMemoryManager.cuh"
 #include "Util.cuh"
@@ -34,10 +35,10 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _numOrigEntries);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _size);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_size, 0, sizeof(uint64_t)));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(_data, &data, sizeof(T*), hipMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_numEntries, 0, sizeof(uint64_t)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_numOrigEntries, 0, sizeof(uint64_t)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_size, 0, sizeof(uint64_t)));
     }
 
     __host__ __inline__ void init(uint64_t size)
@@ -49,16 +50,16 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _numOrigEntries);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _size);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_size, size, sizeof(uint64_t)));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(_data, &data, sizeof(T*), hipMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_numEntries, 0, sizeof(uint64_t)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_numOrigEntries, 0, sizeof(uint64_t)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_size, size, sizeof(uint64_t)));
     }
 
     __host__ __inline__ void free()
     {
         T* data = nullptr;
-        cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost);
+        hipMemcpy(&data, _data, sizeof(T*), hipMemcpyDeviceToHost);
 
         CudaMemoryManager::getInstance().freeMemory(data);
         CudaMemoryManager::getInstance().freeMemory(_data);
@@ -76,37 +77,37 @@ public:
         }
         if (size > 0) {
             T* data;
-            CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
+            CHECK_FOR_CUDA_ERROR(hipMemcpy(&data, _data, sizeof(T*), hipMemcpyDeviceToHost));
             CudaMemoryManager::getInstance().freeMemory(data);
         }
         T* newData;
         CudaMemoryManager::getInstance().acquireMemory<T>(newSize, newData);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &newData, sizeof(T*), cudaMemcpyHostToDevice));
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_size, &newSize, sizeof(uint64_t), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(_data, &newData, sizeof(T*), hipMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(_size, &newSize, sizeof(uint64_t), hipMemcpyHostToDevice));
     }
 
     __host__ __inline__ T* getArray_host() const
     {
         T* result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(T*), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(&result, _data, sizeof(T*), hipMemcpyDeviceToHost));
         return result;
     }
-    __host__ __inline__ void setArray_host(T* data) const { CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice)); }
+    __host__ __inline__ void setArray_host(T* data) const { CHECK_FOR_CUDA_ERROR(hipMemcpy(_data, &data, sizeof(T*), hipMemcpyHostToDevice)); }
 
     __host__ __inline__ uint64_t getSize_host() const
     {
         uint64_t result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _size, sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(&result, _size, sizeof(uint64_t), hipMemcpyDeviceToHost));
         return result;
     }
 
     __host__ __inline__ uint64_t getNumEntries_host() const
     {
         uint64_t result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _numEntries, sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(&result, _numEntries, sizeof(uint64_t), hipMemcpyDeviceToHost));
         return result;
     }
-    __host__ __inline__ void setNumEntries_host(uint64_t value) { checkCudaErrors(cudaMemcpy(_numEntries, &value, sizeof(uint64_t), cudaMemcpyHostToDevice)); }
+    __host__ __inline__ void setNumEntries_host(uint64_t value) { checkCudaErrors(hipMemcpy(_numEntries, &value, sizeof(uint64_t), hipMemcpyHostToDevice)); }
 
     __host__ __inline__ bool shouldResize_host(uint64_t arraySizeInc) const
     {
@@ -213,9 +214,9 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _size);
         CudaMemoryManager::getInstance().acquireMemory<T*>(1, _data);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(int)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(int)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_size, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_numOrigEntries, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_numEntries, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_size, 0, sizeof(int)));
     }
 
     __host__ __inline__ void free()

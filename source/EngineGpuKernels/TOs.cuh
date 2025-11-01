@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 #include <stdint.h>
 
 #include "EngineInterface/EngineConstants.h"

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 ﻿#include "SimulationKernelsLauncher.cuh"
 
 #include "EngineInterface/SpaceCalculator.h"
@@ -138,11 +139,11 @@ bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(
     externalEnergyPresent &= settings.simulationParameters.features.externalEnergyControl;
     if (externalEnergyPresent) {
         double temp;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(
             &temp,
             simulationData.externalEnergy,
             sizeof(double),
-            cudaMemcpyDeviceToHost));
+            hipMemcpyDeviceToHost));
             settings.simulationParameters.externalEnergy = toFloat(temp);
         result = true;
     }

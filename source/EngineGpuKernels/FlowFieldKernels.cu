@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 ﻿#include "FlowFieldKernels.cuh"
 
 #include "EngineInterface/SimulationParameters.h"

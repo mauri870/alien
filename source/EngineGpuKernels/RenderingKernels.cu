@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 ﻿#include "RenderingKernels.cuh"
 
 #include <boost/mpl/min_max.hpp>

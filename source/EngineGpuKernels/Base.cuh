@@ -1,10 +1,11 @@
+#include "hip/hip_runtime.h"
 #pragma once
 
 #include <vector>
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-#include <cuda/helper_cuda.h>
+#include <hip/hip_runtime.h>
+#include <>
+#include <cuda/hip/hip_runtime_api.h>
 
 #include "EngineInterface/GpuSettings.h"
 
@@ -242,26 +243,26 @@ template <typename T>
 inline T copyToHost(T* source)
 {
     T result;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, source, sizeof(T), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(hipMemcpy(&result, source, sizeof(T), hipMemcpyDeviceToHost));
     return result;
 }
 
 template <typename T>
 inline void copyToHost(T* target, T* source, int count = 1)
 {
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(target, source, sizeof(T) * count, cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(hipMemcpy(target, source, sizeof(T) * count, hipMemcpyDeviceToHost));
 }
 
 template <typename T>
 inline void copyToDevice(T* target, T* source, int count = 1)
 {
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(target, source, sizeof(T) * count, cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(hipMemcpy(target, source, sizeof(T) * count, hipMemcpyHostToDevice));
 }
 
 template <typename T>
 void setValueToDevice(T* target, T const& value)
 {
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(target, &value, sizeof(T), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(hipMemcpy(target, &value, sizeof(T), hipMemcpyHostToDevice));
 }
 
 __device__ __inline__ int calcMod(char value, int count)

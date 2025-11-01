@@ -10,18 +10,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type not specified, using Debug" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-# Default CUDA target architectures
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-  set(CMAKE_CUDA_ARCHITECTURES 60)
-endif()
-
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
-
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -lineinfo --use-local-env -use_fast_math")
-
-project(alien-project LANGUAGES C CXX CUDA)
+project(alien-project LANGUAGES C CXX HIP)
 
 include_directories(
     source
@@ -39,15 +30,27 @@ else()
 endif()
 add_compile_definitions($<$<COMPILE_LANGUAGE:CXX>:NOMINMAX>)
 
-# Treat all NVCC (CUDA) warnings as errors
-# add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
+# Recursively find all CUDA source and header files
+file(GLOB_RECURSE CUDA_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cu"
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cuh"
+)
+
+# Mark them as HIP and print each file path
+foreach(src ${CUDA_SOURCES})
+    message(STATUS "Setting LANGUAGE=HIP for: ${src}")
+    set_source_files_properties(${src} PROPERTIES LANGUAGE HIP)
+endforeach()
+
+# TODO(mauri870): support either nvidia or amd
+add_compile_definitions(__HIP_PLATFORM_AMD__)
 
 add_executable(alien)
 add_executable(cli)
 add_executable(EngineTests)
 add_executable(NetworkTests)
 
-find_package(CUDAToolkit)
+find_package(HIP MODULE REQUIRED)
 find_package(Boost REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)

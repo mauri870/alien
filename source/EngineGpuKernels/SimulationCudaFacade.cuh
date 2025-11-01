@@ -9,7 +9,7 @@
 #include <windows.h>
 #endif
 
-#include <vector_types.h>
+#include <hip/hip_vector_types.h>
 #include <GL/gl.h>
 
 #include "EngineInterface/RawStatisticsData.h"
@@ -20,8 +20,6 @@
 #include "EngineInterface/StatisticsHistory.h"
 
 #include "Definitions.cuh"
-
-struct cudaGraphicsResource;
 
 class _SimulationCudaFacade
 {
@@ -104,7 +102,7 @@ private:
 
     GpuInfo _gpuInfo;
     GLuint _textureId = 0;
-    cudaGraphicsResource* _cudaResource = nullptr;
+    hipGraphicsResource* _cudaResource = nullptr;
 
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;

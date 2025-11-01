@@ -1,10 +1,11 @@
+#include "hip/hip_runtime.h"
 #pragma once
 
 #include <vector>
 #include <string>
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-#include <cuda/helper_cuda.h>
+#include <hip/hip_runtime.h>
+#include <>
+#include <cuda/hip/hip_runtime_api.h>
 #include <sstream>
 
 #include "Base/Exceptions.h"
@@ -18,21 +19,21 @@ void checkAndThrowError(T result, char const *const func, const char *const file
         DEVICE_RESET
         std::stringstream stream;
         switch (result) {
-        case cudaError::cudaErrorInsufficientDriver:
+        case hipError_t::hipErrorInsufficientDriver:
             stream << "Your graphics driver is not compatible with the required CUDA version. Please update your NVIDIA graphics driver and restart.";
             break;
-        case cudaError::cudaErrorOperatingSystem:
+        case hipError_t::hipErrorOperatingSystem:
             stream << "An operating system call within the CUDA API failed. Please check if your monitor is plugged to the correct graphics card.";
             break;
-        case cudaError::cudaErrorInitializationError:
+        case hipError_t::hipErrorNotInitialized:
             stream
                 << "CUDA could not be initialized. Please check the minimum hardware requirements. If fulfilled please update your NVIDIA graphics driver and "
                    "restart.";
             break;
-        case cudaError::cudaErrorUnsupportedPtxVersion:
+        case hipError_t::cudaErrorUnsupportedPtxVersion:
             stream << "A CUDA error occurred (cudaErrorUnsupportedPtxVersion). Please update your NVIDIA graphics driver and restart.";
             break;
-        case cudaError::cudaErrorMemoryAllocation:
+        case hipError_t::hipErrorOutOfMemory:
             stream << "A CUDA error occurred while allocating memory. A possible reason could be that there is not enough memory available.";
             break;
         default: {
@@ -45,7 +46,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
         auto text = stream.str();
         log(Priority::Important, text);
 
-        if (cudaError::cudaErrorMemoryAllocation == result) {
+        if (hipError_t::hipErrorOutOfMemory == result) {
             throw CudaMemoryAllocationException(text);
         } else {
             throw CudaException(text);
@@ -75,8 +76,8 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define KERNEL_CALL(func, ...) \
     if (GlobalSettings::getInstance().isDebugMode()) { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
-        cudaDeviceSynchronize(); \
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+        hipDeviceSynchronize(); \
+        CHECK_FOR_CUDA_ERROR(hipGetLastError()); \
     } \
     else { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
@@ -85,8 +86,8 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define KERNEL_CALL_1_1(func, ...) \
     if (GlobalSettings::getInstance().isDebugMode()) { \
         func<<<1, 1>>>(__VA_ARGS__); \
-        cudaDeviceSynchronize(); \
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+        hipDeviceSynchronize(); \
+        CHECK_FOR_CUDA_ERROR(hipGetLastError()); \
     } else { \
         func<<<1, 1>>>(__VA_ARGS__); \
     }
@@ -94,8 +95,8 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define KERNEL_CALL_MOD(func, threadsPerBlock, ...) \
     if (GlobalSettings::getInstance().isDebugMode()) { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
-        cudaDeviceSynchronize(); \
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+        hipDeviceSynchronize(); \
+        CHECK_FOR_CUDA_ERROR(hipGetLastError()); \
     } else { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
     }

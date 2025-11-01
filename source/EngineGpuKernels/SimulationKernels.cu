@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 ﻿#include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
 #include "ClusterProcessor.cuh"

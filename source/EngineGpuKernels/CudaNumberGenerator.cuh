@@ -1,11 +1,12 @@
+#include "hip/hip_runtime.h"
 #pragma once
 
 #include <vector>
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
+#include <hip/hip_runtime.h>
+#include <>
 
-#include <cuda/helper_cuda.h>
+#include <cuda/hip/hip_runtime_api.h>
 
 #include "Array.cuh"
 #include "CudaMemoryManager.cuh"
@@ -32,17 +33,17 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<unsigned long long int>(1, _currentId);
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, _currentSmallId);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_currentIndex, 0, sizeof(unsigned int)));
+        CHECK_FOR_CUDA_ERROR(hipMemset(_currentIndex, 0, sizeof(unsigned int)));
         unsigned long long int hostCurrentId = 1;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_currentId, &hostCurrentId, sizeof(unsigned long long int), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(_currentId, &hostCurrentId, sizeof(unsigned long long int), hipMemcpyHostToDevice));
         unsigned int hostCurrentSmallId = 1;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_currentSmallId, &hostCurrentSmallId, sizeof(unsigned int), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(_currentSmallId, &hostCurrentSmallId, sizeof(unsigned int), hipMemcpyHostToDevice));
 
         std::vector<int> randomNumbers(size);
         for (int i = 0; i < size; ++i) {
             randomNumbers[i] = rand();
         }
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(hipMemcpy(_array, randomNumbers.data(), sizeof(int) * size, hipMemcpyHostToDevice));
     }
 
 

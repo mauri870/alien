@@ -1,14 +1,15 @@
+#include "hip/hip_runtime.h"
 #include "SimulationCudaFacade.cuh"
 
 #include <functional>
 #include <iostream>
 #include <list>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 #include <cuda_gl_interop.h>
 
-#include <device_launch_parameters.h>
-#include <cuda/helper_cuda.h>
+#include <>
+#include <cuda/hip/hip_runtime_api.h>
 
 #include "Base/Exceptions.h"
 #include "Base/LoggingService.h"
@@ -105,7 +106,7 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numAuxiliaryData);
 
-    CHECK_FOR_CUDA_ERROR(cudaDeviceReset());
+    CHECK_FOR_CUDA_ERROR(hipDeviceReset());
     log(Priority::Important, "simulation closed");
 }
 
@@ -115,12 +116,12 @@ void _SimulationCudaFacade::registerImageResource(GLuint textureId)
 
     ////unregister old resource
     //if (_cudaResource) {
-    //    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaResource));
+    //    CHECK_FOR_CUDA_ERROR(hipGraphicsUnregisterResource(_cudaResource));
     //}
 
     ////register new resource
     //CHECK_FOR_CUDA_ERROR(
-    //    cudaGraphicsGLRegisterImage(&_cudaResource, textureId, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
+    //    hipGraphicsGLRegisterImage(&_cudaResource, textureId, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
 
     //return reinterpret_cast<void*>(_cudaResource);
 }
@@ -145,7 +146,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
             std::lock_guard lock(_mutexForSimulationParameters);
             if (_simulationKernels->updateSimulationParametersAfterTimestep(_settings, simulationData, statistics)) {
                 CHECK_FOR_CUDA_ERROR(
-                    cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+                    hipMemcpyToSymbol(HIP_SYMBOL(cudaSimulationParameters), &_settings.simulationParameters, sizeof(SimulationParameters), 0, hipMemcpyHostToDevice));
             }
         }
         auto now = std::chrono::steady_clock::now();
@@ -176,25 +177,25 @@ void _SimulationCudaFacade::drawVectorGraphics(
 {
     checkAndProcessSimulationParameterChanges();
 
-    //auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
-    //CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
+    //auto cudaResourceImpl = reinterpret_cast<hipGraphicsResource*>(cudaResource);
+    //CHECK_FOR_CUDA_ERROR(hipGraphicsMapResources(1, &cudaResourceImpl));
 
-    //cudaArray* mappedArray;
-    //CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResourceImpl, 0, 0));
+    //hipArray* mappedArray;
+    //CHECK_FOR_CUDA_ERROR(hipGraphicsSubResourceGetMappedArray(&mappedArray, cudaResourceImpl, 0, 0));
 
     _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
     _renderingKernels->drawImage(_settings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataIntern(), *_cudaRenderingData);
     syncAndCheck();
 
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaRenderingData->imageDataHost, _cudaRenderingData->imageDataDevice, sizeof(uint64_t) * imageSize.x * imageSize.y, cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(hipMemcpy(
+        _cudaRenderingData->imageDataHost, _cudaRenderingData->imageDataDevice, sizeof(uint64_t) * imageSize.x * imageSize.y, hipMemcpyDeviceToHost));
     glBindTexture(GL_TEXTURE_2D, _textureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, imageSize.x, imageSize.y, 0, GL_RGBA, GL_UNSIGNED_SHORT, _cudaRenderingData->imageDataHost);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     //const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
-    //CHECK_FOR_CUDA_ERROR(cudaMemcpy2DToArray(
+    //CHECK_FOR_CUDA_ERROR(hipMemcpy2DToArray(
     //    mappedArray,
     //    0,
     //    0,
@@ -202,9 +203,9 @@ void _SimulationCudaFacade::drawVectorGraphics(
     //    widthBytes,
     //    widthBytes,
     //    imageSize.y,
-    //    cudaMemcpyDeviceToDevice));
+    //    hipMemcpyDeviceToDevice));
 
-    //CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
+    //CHECK_FOR_CUDA_ERROR(hipGraphicsUnmapResources(1, &cudaResourceImpl));
 }
 
 void _SimulationCudaFacade::getSimulationData(
@@ -397,7 +398,7 @@ void _SimulationCudaFacade::setGpuConstants(GpuSettings const& gpuConstants)
     _settings.gpuSettings = gpuConstants;
 
     CHECK_FOR_CUDA_ERROR(
-        cudaMemcpyToSymbol(cudaThreadSettings, &gpuConstants, sizeof(GpuSettings), 0, cudaMemcpyHostToDevice));
+        hipMemcpyToSymbol(HIP_SYMBOL(cudaThreadSettings), &gpuConstants, sizeof(GpuSettings), 0, hipMemcpyHostToDevice));
 }
 
 SimulationParameters _SimulationCudaFacade::getSimulationParameters() const
@@ -493,7 +494,7 @@ void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutati
         if (_newSimulationParameters) {
             _settings.simulationParameters = *_newSimulationParameters;
             CHECK_FOR_CUDA_ERROR(
-                cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+                hipMemcpyToSymbol(HIP_SYMBOL(cudaSimulationParameters), &*_newSimulationParameters, sizeof(SimulationParameters), 0, hipMemcpyHostToDevice));
             _newSimulationParameters.reset();
         }
     }
@@ -508,12 +509,12 @@ void _SimulationCudaFacade::initCuda()
     log(Priority::Important, "initialize CUDA");
     _gpuInfo = checkAndReturnGpuInfo();
 
-    auto result = cudaSetDevice(_gpuInfo.deviceNumber);
-    if (result != cudaSuccess) {
+    auto result = hipSetDevice(_gpuInfo.deviceNumber);
+    if (result != hipSuccess) {
         throw SystemRequirementNotMetException("CUDA device could not be initialized.");
     }
 
-    cudaGetLastError(); //reset error code
+    hipGetLastError(); //reset error code
 
     log(Priority::Important, "device " + std::to_string(_gpuInfo.deviceNumber) + " selected");
 }
@@ -527,7 +528,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     cachedResult = GpuInfo();
 
     int numberOfDevices;
-    CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
+    CHECK_FOR_CUDA_ERROR(hipGetDeviceCount(&numberOfDevices));
     if (numberOfDevices < 1) {
         throw SystemRequirementNotMetException("No CUDA device found.");
     }
@@ -543,8 +544,8 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
 
     int highestComputeCapability = 0;
     for (int deviceNumber = 0; deviceNumber < numberOfDevices; ++deviceNumber) {
-        cudaDeviceProp prop;
-        CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, deviceNumber));
+        hipDeviceProp_t prop;
+        CHECK_FOR_CUDA_ERROR(hipGetDeviceProperties(&prop, deviceNumber));
 
         std::stringstream stream;
         stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major << "." << prop.minor;
@@ -566,8 +567,8 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
 
 void _SimulationCudaFacade::syncAndCheck()
 {
-    cudaDeviceSynchronize();
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+    hipDeviceSynchronize();
+    CHECK_FOR_CUDA_ERROR(hipGetLastError());
 }
 
 void _SimulationCudaFacade::copyDataTOtoDevice(DataTO const& dataTO)
@@ -633,7 +634,7 @@ void _SimulationCudaFacade::resizeArrays(ArraySizes const& additionals)
     auto auxiliaryDataSize = _cudaSimulationData->objects.auxiliaryData.getSize_host();
     CudaMemoryManager::getInstance().acquireMemory<uint8_t>(auxiliaryDataSize, _cudaAccessTO->auxiliaryData);
 
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+    CHECK_FOR_CUDA_ERROR(hipGetLastError());
 
     log(Priority::Unimportant, "cell array size: " + std::to_string(cellArraySize));
     log(Priority::Unimportant, "particle array size: " + std::to_string(particleArraySize));
@@ -648,7 +649,7 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
     std::lock_guard lock(_mutexForSimulationParameters);
     if (_newSimulationParameters) {
         _settings.simulationParameters = *_newSimulationParameters;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(hipMemcpyToSymbol(HIP_SYMBOL(cudaSimulationParameters), &*_newSimulationParameters, sizeof(SimulationParameters), 0, hipMemcpyHostToDevice));
         _newSimulationParameters.reset();
 
         if (_cudaSimulationData) {
