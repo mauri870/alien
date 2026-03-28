@@ -4,6 +4,8 @@
 #include <windows.h>
 #endif
 
+#include <GL/gl.h>
+
 #include <cuda_gl_interop.h>
 #include <algorithm>
 #include <vector>
