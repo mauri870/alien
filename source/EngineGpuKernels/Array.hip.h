@@ -1,9 +1,7 @@
-#include "hip/hip_runtime.h"
 #pragma once
 
 #include <hip/hip_runtime.h>
-#include <>
-#include <cuda/hip/hip_runtime_api.h>
+#include <hip/hip_runtime_api.h>
 
 #include "CudaMemoryManager.hip.h"
 #include "Util.hip.h"
@@ -107,7 +105,7 @@ public:
         CHECK_FOR_CUDA_ERROR(hipMemcpy(&result, _numEntries, sizeof(uint64_t), hipMemcpyDeviceToHost));
         return result;
     }
-    __host__ __inline__ void setNumEntries_host(uint64_t value) { checkCudaErrors(hipMemcpy(_numEntries, &value, sizeof(uint64_t), hipMemcpyHostToDevice)); }
+    __host__ __inline__ void setNumEntries_host(uint64_t value) { CHECK_FOR_CUDA_ERROR(hipMemcpy(_numEntries, &value, sizeof(uint64_t), hipMemcpyHostToDevice)); }
 
     __host__ __inline__ bool shouldResize_host(uint64_t arraySizeInc) const
     {

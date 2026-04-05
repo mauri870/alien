@@ -1,8 +1,7 @@
 #include "hip/hip_runtime.h"
-﻿#pragma once
+#pragma once
 
 #include "hip/hip_runtime_api.h"
-#include "sm_60_atomic_functions.h"
 
 #include "EngineInterface/CellFunctionConstants.h"
 
@@ -180,14 +179,14 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             if (!otherCell->barrier && distance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
 
                 //calc density
-                atomicAdd_block(&density, calcKernel(distance / smoothingLength) / (smoothingLength * smoothingLength));
+                atomicAdd(&density, calcKernel(distance / smoothingLength) / (smoothingLength * smoothingLength));
 
                 if (cell != otherCell) {
 
                     //overlap correction
                     if (!cell->barrier && distance < cudaSimulationParameters.cellMinDistance) {
-                        atomicAdd_block(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.cellMinDistance / 5);
-                        atomicAdd_block(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.cellMinDistance / 5);
+                        atomicAdd(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.cellMinDistance / 5);
+                        atomicAdd(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.cellMinDistance / 5);
                     }
 
                     bool isConnected = false;
@@ -209,12 +208,12 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                             float kernel_d = calcKernel_d(distance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
                             auto F_pressureDelta = posDelta / (-distance) * factor * kernel_d;
-                            atomicAdd_block(&F_pressure.x, F_pressureDelta.x);
-                            atomicAdd_block(&F_pressure.y, F_pressureDelta.y);
+                            atomicAdd(&F_pressure.x, F_pressureDelta.x);
+                            atomicAdd(&F_pressure.y, F_pressureDelta.y);
 
                             auto F_viscosityDelta = velDelta / otherCell->density * distance * kernel_d / (distance * distance + 0.25f);
-                            atomicAdd_block(&F_viscosity.x, F_viscosityDelta.x);
-                            atomicAdd_block(&F_viscosity.y, F_viscosityDelta.y);
+                            atomicAdd(&F_viscosity.x, F_viscosityDelta.x);
+                            atomicAdd(&F_viscosity.y, F_viscosityDelta.y);
                         }
 
                         //fusion

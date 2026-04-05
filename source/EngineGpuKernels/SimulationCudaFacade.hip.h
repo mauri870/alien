@@ -102,7 +102,7 @@ private:
 
     GpuInfo _gpuInfo;
     GLuint _textureId = 0;
-    hipGraphicsResource* _cudaResource = nullptr;
+    //hipGraphicsResource* _cudaResource = nullptr;  // GL interop disabled
 
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;

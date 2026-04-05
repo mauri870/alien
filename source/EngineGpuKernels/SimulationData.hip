@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#include "SimulationData.hip.h"
+#include "SimulationData.hip.h"
 
 #include "ConstantMemory.hip.h"
 #include "GarbageCollectorKernels.hip.h"

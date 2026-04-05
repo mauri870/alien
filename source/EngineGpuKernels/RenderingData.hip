@@ -1,4 +1,4 @@
-﻿#include "RenderingData.hip.h"
+#include "RenderingData.hip.h"
 
 void RenderingData::init() {}
 

@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#pragma once
+#pragma once
 
 #include "hip/hip_runtime_api.h"
 

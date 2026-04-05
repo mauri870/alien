@@ -1,4 +1,4 @@
-﻿#include "DataAccessKernelsLauncher.hip.h"
+#include "DataAccessKernelsLauncher.hip.h"
 
 #include "DataAccessKernels.hip.h"
 #include "GarbageCollectorKernelsLauncher.hip.h"

@@ -1,4 +1,4 @@
-﻿#include "GarbageCollectorKernelsLauncher.hip.h"
+#include "GarbageCollectorKernelsLauncher.hip.h"
 
 _GarbageCollectorKernelsLauncher::_GarbageCollectorKernelsLauncher()
 {

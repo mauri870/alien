@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#include "RenderingKernels.hip.h"
+#include "RenderingKernels.hip.h"
 
 #include <boost/mpl/min_max.hpp>
 

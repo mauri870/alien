@@ -2,7 +2,6 @@
 #pragma once
 
 #include "hip/hip_runtime_api.h"
-#include "sm_60_atomic_functions.h"
 
 #include "Base.hip.h"
 #include "Map.hip.h"

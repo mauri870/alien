@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#include "EditKernels.hip.h"
+#include "EditKernels.hip.h"
 
 #include "MutationProcessor.hip.h"
 

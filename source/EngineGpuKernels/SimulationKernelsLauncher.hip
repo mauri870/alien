@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#include "SimulationKernelsLauncher.hip.h"
+#include "SimulationKernelsLauncher.hip.h"
 
 #include "EngineInterface/SpaceCalculator.h"
 

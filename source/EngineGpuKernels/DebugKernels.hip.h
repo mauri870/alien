@@ -2,7 +2,6 @@
 #pragma once
 
 #include "hip/hip_runtime_api.h"
-#include "sm_60_atomic_functions.h"
 
 #include "SimulationData.hip.h"
 #include "ParticleProcessor.hip.h"

@@ -1,11 +1,9 @@
-#include "hip/hip_runtime.h"
 #pragma once
 
 #include <vector>
 
 #include <hip/hip_runtime.h>
-#include <>
-#include <cuda/hip/hip_runtime_api.h>
+#include <hip/hip_runtime_api.h>
 
 #include "EngineInterface/GpuSettings.h"
 

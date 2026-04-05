@@ -1,7 +1,6 @@
-#include "hip/hip_runtime.h"
 #pragma once
 
-#include <nppdefs.h>
+#include <climits>
 
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellFunctionConstants.h"
@@ -51,7 +50,7 @@ struct GenomeHeader
     float concatenationAngle1;
     float concatenationAngle2;
 
-    __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == NPP_MAX_32S; }
+    __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == INT_MAX; }
 };
 
 struct CellMetadataDescription

@@ -1,4 +1,4 @@
-﻿#include "StatisticsKernelsLauncher.hip.h"
+#include "StatisticsKernelsLauncher.hip.h"
 
 #include "StatisticsKernels.hip.h"
 

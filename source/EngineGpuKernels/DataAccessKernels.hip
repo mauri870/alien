@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#include "DataAccessKernels.hip.h"
+#include "DataAccessKernels.hip.h"
 
 namespace
 {

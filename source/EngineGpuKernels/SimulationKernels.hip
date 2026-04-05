@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#include "SimulationKernels.hip.h"
+#include "SimulationKernels.hip.h"
 #include "FlowFieldKernels.hip.h"
 #include "ClusterProcessor.hip.h"
 #include "CellFunctionProcessor.hip.h"

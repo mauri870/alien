@@ -1,4 +1,4 @@
-﻿#include "EditKernelsLauncher.hip.h"
+#include "EditKernelsLauncher.hip.h"
 
 #include "DataAccessKernels.hip.h"
 #include "EditKernels.hip.h"

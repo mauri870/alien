@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <hip/hip_vector_types.h>
+
 #include "EngineInterface/ArraySizes.h"
 
 struct Cell;

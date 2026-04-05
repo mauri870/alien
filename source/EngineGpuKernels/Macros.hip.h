@@ -1,11 +1,10 @@
-#include "hip/hip_runtime.h"
 #pragma once
 
 #include <vector>
 #include <string>
+#include <cstring>
 #include <hip/hip_runtime.h>
-#include <>
-#include <cuda/hip/hip_runtime_api.h>
+#include <hip/hip_runtime_api.h>
 #include <sstream>
 
 #include "Base/Exceptions.h"
@@ -16,32 +15,29 @@ template< typename T >
 void checkAndThrowError(T result, char const *const func, const char *const file, int const line)
 {
     if (result) {
-        DEVICE_RESET
+        hipDeviceReset();
         std::stringstream stream;
         switch (result) {
         case hipError_t::hipErrorInsufficientDriver:
-            stream << "Your graphics driver is not compatible with the required CUDA version. Please update your NVIDIA graphics driver and restart.";
+            stream << "Your graphics driver is not compatible with the required HIP version. Please update your AMD graphics driver and restart.";
             break;
         case hipError_t::hipErrorOperatingSystem:
-            stream << "An operating system call within the CUDA API failed. Please check if your monitor is plugged to the correct graphics card.";
+            stream << "An operating system call within the HIP API failed. Please check if your monitor is plugged to the correct graphics card.";
             break;
         case hipError_t::hipErrorNotInitialized:
             stream
-                << "CUDA could not be initialized. Please check the minimum hardware requirements. If fulfilled please update your NVIDIA graphics driver and "
+                << "HIP could not be initialized. Please check the minimum hardware requirements. If fulfilled please update your AMD graphics driver and "
                    "restart.";
             break;
-        case hipError_t::cudaErrorUnsupportedPtxVersion:
-            stream << "A CUDA error occurred (cudaErrorUnsupportedPtxVersion). Please update your NVIDIA graphics driver and restart.";
-            break;
         case hipError_t::hipErrorOutOfMemory:
-            stream << "A CUDA error occurred while allocating memory. A possible reason could be that there is not enough memory available.";
+            stream << "A HIP error occurred while allocating memory. A possible reason could be that there is not enough memory available.";
             break;
         default: {
-            stream << "CUDA error.";
+            stream << "HIP error.";
         }
             break;
         }
-        stream << std::endl << "Location: " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "(" << _cudaGetErrorEnum(result) << ") \"" << func
+        stream << std::endl << "Location: " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "(" << hipGetErrorName(result) << ") \"" << func
                << "\"";
         auto text = stream.str();
         log(Priority::Important, text);
@@ -59,7 +55,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define CHECK_FOR_CUDA_ERROR(val) \
     checkAndThrowError( (val), #val, __FILENAME__, __LINE__ )
 
-#define ABORT() asm("trap;");
+#define ABORT() __builtin_trap();
 
 #define NEAR_ZERO 0.00001f
 

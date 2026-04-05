@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#pragma once
+#pragma once
 
 #include "EngineInterface/SelectionShallowData.h"
 #include "Definitions.hip.h"

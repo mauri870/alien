@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include <cuda/hip/hip_runtime_api.h>
+#include <hip/hip_runtime_api.h>
 
 #include "Base.hip.h"
 #include "Macros.hip.h"

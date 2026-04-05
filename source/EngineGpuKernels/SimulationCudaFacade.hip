@@ -1,4 +1,3 @@
-#include "hip/hip_runtime.h"
 #include "SimulationCudaFacade.hip.h"
 
 #include <functional>
@@ -6,10 +5,7 @@
 #include <list>
 
 #include <hip/hip_runtime.h>
-#include <cuda_gl_interop.h>
-
-#include <>
-#include <cuda/hip/hip_runtime_api.h>
+#include <hip/hip_runtime_api.h>
 
 #include "Base/Exceptions.h"
 #include "Base/LoggingService.h"

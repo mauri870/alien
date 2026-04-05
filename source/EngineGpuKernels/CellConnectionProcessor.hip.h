@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#pragma once
+#pragma once
 
 #include "Base.hip.h"
 #include "Definitions.hip.h"

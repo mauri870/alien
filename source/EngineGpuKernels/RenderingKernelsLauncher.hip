@@ -1,4 +1,4 @@
-﻿#include "RenderingKernelsLauncher.hip.h"
+#include "RenderingKernelsLauncher.hip.h"
 
 #include "RenderingData.hip.h"
 #include "RenderingKernels.hip.h"

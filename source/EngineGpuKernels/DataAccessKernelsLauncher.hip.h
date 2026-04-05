@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"

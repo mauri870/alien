@@ -1,8 +1,7 @@
-#include "hip/hip_runtime.h"
 #pragma once
 
-#include "hip/hip_runtime_api.h"
-#include "sm_60_atomic_functions.h"
+#include <hip/hip_runtime.h>
+#include <hip/hip_runtime_api.h>
 
 #include "SimulationData.hip.h"
 #include "Object.hip.h"

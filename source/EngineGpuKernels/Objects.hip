@@ -1,4 +1,4 @@
-﻿#include "Objects.hip.h"
+#include "Objects.hip.h"
 
 #include "Object.hip.h"
 

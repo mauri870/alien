@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#include "StatisticsKernels.hip.h"
+#include "StatisticsKernels.hip.h"
 
 #include "GenomeDecoder.hip.h"
 

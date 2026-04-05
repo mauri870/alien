@@ -1,5 +1,5 @@
 #include "hip/hip_runtime.h"
-﻿#include "FlowFieldKernels.hip.h"
+#include "FlowFieldKernels.hip.h"
 
 #include "EngineInterface/SimulationParameters.h"
 
