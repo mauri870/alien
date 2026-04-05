@@ -5,4 +5,4 @@
 cd ./build
 
 source $HOME/git/scale/bin/scaleenv gfx1100
-mangohud gamemoderun ./alien
+gamemoderun mangohud ./alien
