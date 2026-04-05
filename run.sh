@@ -4,5 +4,5 @@
 
 cd ./build
 
-source $HOME/git/scale/bin/scaleenv gfx1100
+# source $HOME/git/scale/bin/scaleenv gfx1100
 gamemoderun mangohud ./alien
