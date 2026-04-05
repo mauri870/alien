@@ -2,7 +2,7 @@
 
 struct GpuSettings
 {
-    int numBlocks = 16384;
+    int numBlocks = 1024;
 
     bool operator==(GpuSettings const& other) const
     {
