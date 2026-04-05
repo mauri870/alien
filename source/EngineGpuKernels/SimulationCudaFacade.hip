@@ -1,3 +1,5 @@
+#include <glad/glad.h>
+
 #include "SimulationCudaFacade.hip.h"
 
 #include <functional>
@@ -95,6 +97,15 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     _editKernels.reset();
     _statisticsKernels.reset();
 
+    if (_cudaResource) {
+        hipGraphicsUnregisterResource(_cudaResource);
+        _cudaResource = nullptr;
+    }
+    if (_pbo) {
+        glDeleteBuffers(1, &_pbo);
+        _pbo = 0;
+    }
+
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->auxiliaryData);
@@ -110,16 +121,23 @@ void _SimulationCudaFacade::registerImageResource(GLuint textureId)
 {
     _textureId = textureId;
 
-    ////unregister old resource
-    //if (_cudaResource) {
-    //    CHECK_FOR_CUDA_ERROR(hipGraphicsUnregisterResource(_cudaResource));
-    //}
+    // Invalidate PBO so it gets recreated at the correct size in drawVectorGraphics.
+    if (_cudaResource) {
+        CHECK_FOR_CUDA_ERROR(hipGraphicsUnregisterResource(_cudaResource));
+        _cudaResource = nullptr;
+    }
+    _pboSize = {0, 0};
 
-    ////register new resource
-    //CHECK_FOR_CUDA_ERROR(
-    //    hipGraphicsGLRegisterImage(&_cudaResource, textureId, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
-
-    //return reinterpret_cast<void*>(_cudaResource);
+    // Re-select the HIP device that is compatible with the current OpenGL context.
+    // hipGLGetDevices must be called after an OpenGL context is current (guaranteed here
+    // since we received a valid textureId). Without this, hipGraphicsGLRegisterBuffer fails.
+    unsigned int glDeviceCount = 0;
+    int glDevice = 0;
+    auto glResult = hipGLGetDevices(&glDeviceCount, &glDevice, 1, hipGLDeviceListAll);
+    if (glResult == hipSuccess && glDeviceCount > 0) {
+        CHECK_FOR_CUDA_ERROR(hipSetDevice(glDevice));
+        log(Priority::Important, "GL-interop HIP device: " + std::to_string(glDevice));
+    }
 }
 
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
@@ -147,8 +165,10 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
         }
         auto now = std::chrono::steady_clock::now();
         if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
-            _lastStatisticsUpdateTime = now;
             updateStatistics();
+            // Set timestamp AFTER completion so the interval is measured from end of last update,
+            // preventing a feedback loop when updateStatistics() takes longer than StatisticsUpdate.
+            _lastStatisticsUpdateTime = std::chrono::steady_clock::now();
         }
     }
     if (forceUpdateStatistics) {
@@ -173,35 +193,43 @@ void _SimulationCudaFacade::drawVectorGraphics(
 {
     checkAndProcessSimulationParameterChanges();
 
-    //auto cudaResourceImpl = reinterpret_cast<hipGraphicsResource*>(cudaResource);
-    //CHECK_FOR_CUDA_ERROR(hipGraphicsMapResources(1, &cudaResourceImpl));
-
-    //hipArray* mappedArray;
-    //CHECK_FOR_CUDA_ERROR(hipGraphicsSubResourceGetMappedArray(&mappedArray, cudaResourceImpl, 0, 0));
-
     _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
     _renderingKernels->drawImage(_settings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataIntern(), *_cudaRenderingData);
     syncAndCheck();
 
-    CHECK_FOR_CUDA_ERROR(hipMemcpy(
-        _cudaRenderingData->imageDataHost, _cudaRenderingData->imageDataDevice, sizeof(uint64_t) * imageSize.x * imageSize.y, hipMemcpyDeviceToHost));
+    // Create or resize the PBO if the image dimensions changed.
+    if (_pboSize.x != imageSize.x || _pboSize.y != imageSize.y) {
+        if (_cudaResource) {
+            CHECK_FOR_CUDA_ERROR(hipGraphicsUnregisterResource(_cudaResource));
+            _cudaResource = nullptr;
+        }
+        if (_pbo == 0) {
+            glGenBuffers(1, &_pbo);
+        }
+        const size_t bufferSize = sizeof(uint64_t) * imageSize.x * imageSize.y;
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, static_cast<GLsizeiptr>(bufferSize), nullptr, GL_STREAM_DRAW);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        CHECK_FOR_CUDA_ERROR(hipGraphicsGLRegisterBuffer(&_cudaResource, _pbo, hipGraphicsRegisterFlagsWriteDiscard));
+        _pboSize = imageSize;
+    }
+
+    // Map PBO into HIP address space and copy rendered image data into it (device→device).
+    CHECK_FOR_CUDA_ERROR(hipGraphicsMapResources(1, &_cudaResource));
+    void* pboDevPtr = nullptr;
+    size_t pboSize = 0;
+    CHECK_FOR_CUDA_ERROR(hipGraphicsResourceGetMappedPointer(&pboDevPtr, &pboSize, _cudaResource));
+    CHECK_FOR_CUDA_ERROR(hipMemcpy(pboDevPtr, _cudaRenderingData->imageDataDevice,
+        sizeof(uint64_t) * imageSize.x * imageSize.y, hipMemcpyDeviceToDevice));
+    CHECK_FOR_CUDA_ERROR(hipGraphicsUnmapResources(1, &_cudaResource));
+
+    // Upload PBO to GL texture — the GL driver performs this as a GPU-side DMA transfer.
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
     glBindTexture(GL_TEXTURE_2D, _textureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, imageSize.x, imageSize.y, 0, GL_RGBA, GL_UNSIGNED_SHORT, _cudaRenderingData->imageDataHost);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, imageSize.x, imageSize.y, GL_RGBA, GL_UNSIGNED_SHORT, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    //const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
-    //CHECK_FOR_CUDA_ERROR(hipMemcpy2DToArray(
-    //    mappedArray,
-    //    0,
-    //    0,
-    //    _cudaRenderingData->imageDataDevice,
-    //    widthBytes,
-    //    widthBytes,
-    //    imageSize.y,
-    //    hipMemcpyDeviceToDevice));
-
-    //CHECK_FOR_CUDA_ERROR(hipGraphicsUnmapResources(1, &cudaResourceImpl));
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
 void _SimulationCudaFacade::getSimulationData(

@@ -9,8 +9,9 @@
 #include <windows.h>
 #endif
 
+#include <hip/hip_runtime.h>
 #include <hip/hip_vector_types.h>
-#include <GL/gl.h>
+#include <hip/amd_detail/amd_hip_gl_interop.h>
 
 #include "EngineInterface/RawStatisticsData.h"
 #include "EngineInterface/Settings.h"
@@ -102,7 +103,9 @@ private:
 
     GpuInfo _gpuInfo;
     GLuint _textureId = 0;
-    //hipGraphicsResource* _cudaResource = nullptr;  // GL interop disabled
+    GLuint _pbo = 0;
+    int2 _pboSize = {0, 0};
+    hipGraphicsResource* _cudaResource = nullptr;
 
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;
